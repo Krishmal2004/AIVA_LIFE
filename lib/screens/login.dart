@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:aiva_life/screens/signup.dart';
+import 'package:aiva_life/widgets/LoginPage/LoginButton.dart';
+import 'package:aiva_life/widgets/LoginPage/SocialOrb.dart';
+import 'package:aiva_life/widgets/LoginPage/OutlinedField.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -49,7 +52,6 @@ class _LoginPageState extends State<LoginPage>
     _passwordController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +76,6 @@ class _LoginPageState extends State<LoginPage>
               position: _slideUp,
               child: Column(
                 children: [
-                  // ── Back button ──────────────────────────────────────────
                   Padding(
                     padding: const EdgeInsets.only(left: 16, top: 8),
                     child: Align(
@@ -101,10 +102,7 @@ class _LoginPageState extends State<LoginPage>
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 32),
-
-                  // ── Avatar ───────────────────────────────────────────────
                   Container(
                     width: 88,
                     height: 88,
@@ -125,21 +123,18 @@ class _LoginPageState extends State<LoginPage>
                       color: Color(0xFFAA55DD),
                     ),
                   ),
-
                   const SizedBox(height: 48),
-
-                  // ── Fields ───────────────────────────────────────────────
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 36),
                     child: Column(
                       children: [
-                        _OutlinedField(
+                        OutlinedField(
                           controller: _usernameController,
                           hint: 'Username',
                           icon: Icons.person_outline_rounded,
                         ),
                         const SizedBox(height: 18),
-                        _OutlinedField(
+                        OutlinedField(
                           controller: _passwordController,
                           hint: 'Password',
                           icon: Icons.lock_outline_rounded,
@@ -159,37 +154,28 @@ class _LoginPageState extends State<LoginPage>
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 36),
-
-                  // ── Login button ─────────────────────────────────────────
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 36),
-                    child: _LoginButton(
+                    child: LoginButton(
                       label: 'Login',
                       onTap: () {
                         // TODO: handle login
                       },
                     ),
                   ),
-
                   const Spacer(),
-
-                  // ── Social orbs ──────────────────────────────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _SocialOrb(icon: Icons.g_mobiledata_rounded),
+                      SocialOrb(icon: Icons.g_mobiledata_rounded),
                       const SizedBox(width: 20),
-                      _SocialOrb(icon: Icons.facebook_rounded),
+                      SocialOrb(icon: Icons.facebook_rounded),
                       const SizedBox(width: 20),
-                      _SocialOrb(icon: Icons.apple_rounded),
+                      SocialOrb(icon: Icons.apple_rounded),
                     ],
                   ),
-
                   const SizedBox(height: 24),
-
-                  // ── Sign up link ─────────────────────────────────────────
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -227,10 +213,7 @@ class _LoginPageState extends State<LoginPage>
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
-                  // ── Home indicator ───────────────────────────────────────
                   Container(
                     width: 120,
                     height: 4,
@@ -246,134 +229,6 @@ class _LoginPageState extends State<LoginPage>
           ),
         ),
       ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Outlined text field
-// ─────────────────────────────────────────────────────────────────────────────
-class _OutlinedField extends StatelessWidget {
-  final TextEditingController controller;
-  final String hint;
-  final IconData icon;
-  final bool obscure;
-  final Widget? suffixIcon;
-
-  const _OutlinedField({
-    required this.controller,
-    required this.hint,
-    required this.icon,
-    this.obscure = false,
-    this.suffixIcon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 52,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: Colors.white.withOpacity(0.65), width: 1.5),
-        color: Colors.white.withOpacity(0.08),
-      ),
-      child: TextField(
-        controller: controller,
-        obscureText: obscure,
-        style: const TextStyle(color: Colors.white, fontSize: 15),
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: Colors.white70, size: 20),
-          suffixIcon: suffixIcon,
-          hintText: hint,
-          hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 15,
-          ),
-          border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Login / action button
-// ─────────────────────────────────────────────────────────────────────────────
-class _LoginButton extends StatefulWidget {
-  final String label;
-  final VoidCallback onTap;
-  const _LoginButton({required this.label, required this.onTap});
-
-  @override
-  State<_LoginButton> createState() => _LoginButtonState();
-}
-
-class _LoginButtonState extends State<_LoginButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.96 : 1.0,
-        duration: const Duration(milliseconds: 100),
-        child: Container(
-          width: double.infinity,
-          height: 52,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            border:
-                Border.all(color: Colors.white.withOpacity(0.75), width: 1.5),
-            color: Colors.white.withOpacity(0.12),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            widget.label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Social login orb
-// ─────────────────────────────────────────────────────────────────────────────
-class _SocialOrb extends StatelessWidget {
-  final IconData icon;
-  const _SocialOrb({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withOpacity(0.92),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.white.withOpacity(0.3),
-            blurRadius: 14,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Icon(icon, color: const Color(0xFF8A2BE2), size: 28),
     );
   }
 }
