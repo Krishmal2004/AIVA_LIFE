@@ -1,10 +1,11 @@
 import ballerina/http;
 import ballerinax/java.jdbc;
-import backend.services.loginService;
+import backend.services; 
 
 final jdbc:Client dbClient = check new ("jdbc:sqlite:./aiva_life.db");
 
-listener http:Listener listener = new (8080);
+// ep = end_point
+listener http:Listener ep = new (8080);
 
 function init() returns error? {
     _ = check dbClient->execute(`CREATE TABLE IF NOT EXISTS users (
