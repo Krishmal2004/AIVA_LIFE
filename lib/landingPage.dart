@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aiva_life/screens/login.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -27,13 +28,13 @@ class _LandingPageState extends State<LandingPage>
       curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
     );
 
-    _slideUp = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animController,
-      curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
-    ));
+    _slideUp = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _animController,
+            curve: const Interval(0.3, 0.8, curve: Curves.easeOut),
+          ),
+        );
 
     _buttonScale = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(
@@ -136,7 +137,9 @@ class _LandingPageState extends State<LandingPage>
                                   letterSpacing: -0.5,
                                 ),
                                 children: [
-                                  TextSpan(text: 'Making technology\neasy for '),
+                                  TextSpan(
+                                    text: 'Making technology\neasy for ',
+                                  ),
                                   WidgetSpan(
                                     alignment: PlaceholderAlignment.baseline,
                                     baseline: TextBaseline.alphabetic,
@@ -165,7 +168,12 @@ class _LandingPageState extends State<LandingPage>
                               scale: _buttonScale,
                               child: _GetStartedButton(
                                 onTap: () {
-                                  // TODO: Navigate to the next screen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const LoginPage(),
+                                    ),
+                                  );
                                 },
                               ),
                             ),
@@ -185,6 +193,7 @@ class _LandingPageState extends State<LandingPage>
     );
   }
 }
+
 class _HeroIllustration extends StatefulWidget {
   final Size size;
   const _HeroIllustration({required this.size});
@@ -233,8 +242,9 @@ class _HeroIllustrationState extends State<_HeroIllustration>
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00D4FF)
-                        .withOpacity(0.12 * _glowPulse.value),
+                    color: const Color(
+                      0xFF00D4FF,
+                    ).withOpacity(0.12 * _glowPulse.value),
                     blurRadius: 90,
                     spreadRadius: 30,
                   ),
@@ -262,6 +272,7 @@ class _HeroIllustrationState extends State<_HeroIllustration>
     );
   }
 }
+
 class _GlobeWidget extends StatelessWidget {
   final double glowValue;
   final double size;
@@ -286,14 +297,10 @@ class _GlobeWidget extends StatelessWidget {
           ],
           stops: const [0.0, 0.35, 0.65, 1.0],
         ),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.25),
-          width: 1.5,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.25), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color:
-                const Color(0xFF00D4FF).withOpacity(0.35 * glowValue),
+            color: const Color(0xFF00D4FF).withOpacity(0.35 * glowValue),
             blurRadius: 40,
             spreadRadius: 5,
           ),
@@ -324,9 +331,7 @@ class _GlobeWidget extends StatelessWidget {
                   colors: [Color(0xFF7DE8FF), Colors.white],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                ).createShader(
-                  Rect.fromLTWH(0, 0, size * 0.5, size * 0.4),
-                ),
+                ).createShader(Rect.fromLTWH(0, 0, size * 0.5, size * 0.4)),
               letterSpacing: 2,
               shadows: [
                 Shadow(
@@ -360,6 +365,7 @@ class _GlobeWidget extends StatelessWidget {
     );
   }
 }
+
 class _CitySkyline extends StatelessWidget {
   final double width;
   final double height;
@@ -367,10 +373,7 @@ class _CitySkyline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(width, height),
-      painter: _SkylinePainter(),
-    );
+    return CustomPaint(size: Size(width, height), painter: _SkylinePainter());
   }
 }
 
@@ -417,6 +420,7 @@ class _SkylinePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 class _RobotHandPainter extends CustomPainter {
   final double glowIntensity;
   _RobotHandPainter({required this.glowIntensity});
@@ -440,8 +444,7 @@ class _RobotHandPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final glowPaint = Paint()
-      ..color =
-          const Color(0xFF00D4FF).withOpacity(0.18 * glowIntensity)
+      ..color = const Color(0xFF00D4FF).withOpacity(0.18 * glowIntensity)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22);
 
     final palmPath = Path();
@@ -450,32 +453,91 @@ class _RobotHandPainter extends CustomPainter {
 
     palmPath.moveTo(cx - size.width * 0.22, size.height * 0.95);
     palmPath.quadraticBezierTo(
-        cx - size.width * 0.30, py + size.height * 0.12,
-        cx - size.width * 0.24, py);
-    palmPath.quadraticBezierTo(cx, py - size.height * 0.04,
-        cx + size.width * 0.24, py);
+      cx - size.width * 0.30,
+      py + size.height * 0.12,
+      cx - size.width * 0.24,
+      py,
+    );
     palmPath.quadraticBezierTo(
-        cx + size.width * 0.30, py + size.height * 0.12,
-        cx + size.width * 0.22, size.height * 0.95);
+      cx,
+      py - size.height * 0.04,
+      cx + size.width * 0.24,
+      py,
+    );
+    palmPath.quadraticBezierTo(
+      cx + size.width * 0.30,
+      py + size.height * 0.12,
+      cx + size.width * 0.22,
+      size.height * 0.95,
+    );
     palmPath.close();
 
     canvas.drawPath(palmPath, glowPaint);
     canvas.drawPath(palmPath, palmPaint);
     canvas.drawPath(palmPath, highlightPaint);
 
-    _drawFinger(canvas, size, palmPaint, highlightPaint, glowPaint,
-        cx - size.width * 0.18, py, size.width * 0.065, size.height * 0.28, -8);
-    _drawFinger(canvas, size, palmPaint, highlightPaint, glowPaint,
-        cx - size.width * 0.06, py, size.width * 0.065, size.height * 0.32, -3);
-    _drawFinger(canvas, size, palmPaint, highlightPaint, glowPaint,
-        cx + size.width * 0.06, py, size.width * 0.065, size.height * 0.32, 3);
-    _drawFinger(canvas, size, palmPaint, highlightPaint, glowPaint,
-        cx + size.width * 0.18, py, size.width * 0.065, size.height * 0.28, 8);
+    _drawFinger(
+      canvas,
+      size,
+      palmPaint,
+      highlightPaint,
+      glowPaint,
+      cx - size.width * 0.18,
+      py,
+      size.width * 0.065,
+      size.height * 0.28,
+      -8,
+    );
+    _drawFinger(
+      canvas,
+      size,
+      palmPaint,
+      highlightPaint,
+      glowPaint,
+      cx - size.width * 0.06,
+      py,
+      size.width * 0.065,
+      size.height * 0.32,
+      -3,
+    );
+    _drawFinger(
+      canvas,
+      size,
+      palmPaint,
+      highlightPaint,
+      glowPaint,
+      cx + size.width * 0.06,
+      py,
+      size.width * 0.065,
+      size.height * 0.32,
+      3,
+    );
+    _drawFinger(
+      canvas,
+      size,
+      palmPaint,
+      highlightPaint,
+      glowPaint,
+      cx + size.width * 0.18,
+      py,
+      size.width * 0.065,
+      size.height * 0.28,
+      8,
+    );
 
     // Thumb
-    _drawFinger(canvas, size, palmPaint, highlightPaint, glowPaint,
-        cx - size.width * 0.27, py + size.height * 0.06,
-        size.width * 0.055, size.height * 0.20, -20);
+    _drawFinger(
+      canvas,
+      size,
+      palmPaint,
+      highlightPaint,
+      glowPaint,
+      cx - size.width * 0.27,
+      py + size.height * 0.06,
+      size.width * 0.055,
+      size.height * 0.20,
+      -20,
+    );
 
     final knucklePaint = Paint()
       ..color = Colors.white.withOpacity(0.22)
@@ -539,9 +601,6 @@ class _RobotHandPainter extends CustomPainter {
       old.glowIntensity != glowIntensity;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Circuit board painter
-// ─────────────────────────────────────────────────────────────────────────────
 enum _CircuitSide { left, right }
 
 class _CircuitPainter extends CustomPainter {
@@ -583,8 +642,10 @@ class _CircuitPainter extends CustomPainter {
       }
       canvas.drawPath(path, linePaint);
       canvas.drawCircle(
-        Offset(seg[seg.length - 2] * size.width,
-            seg[seg.length - 1] * size.height),
+        Offset(
+          seg[seg.length - 2] * size.width,
+          seg[seg.length - 1] * size.height,
+        ),
         2.5,
         dotPaint,
       );
