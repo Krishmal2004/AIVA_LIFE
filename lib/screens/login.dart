@@ -120,10 +120,10 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFF8C00), // orange
-              Color(0xFFE05CB0), // pink-ish mid
-              Color(0xFF8A2BE2), // deep violet
-              Color(0xFF6A0DAD), // purple bottom
+              Color(0xFFFF8C00), 
+              Color(0xFFE05CB0), 
+              Color(0xFF8A2BE2), 
+              Color(0xFF6A0DAD),
             ],
             stops: [0.0, 0.35, 0.65, 1.0],
           ),
@@ -274,15 +274,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Container(
-                    width: 120,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.55),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
                 ],
               ),
             ),

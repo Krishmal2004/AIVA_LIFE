@@ -65,7 +65,6 @@ class _SignupPageState extends State<SignupPage>
     final password = _passwordController.text;
     final confirm = _confirmPasswordController.text;
 
-    // 1. Basic validation before sending request
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
       _showSnackBar("Please fill in all fields", Colors.redAccent);
       return;
@@ -94,19 +93,17 @@ class _SignupPageState extends State<SignupPage>
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        // Handle http:Created 
         _showSnackBar(responseData['message'] ?? "Account created!", Colors.green);
         Navigator.maybePop(context);
       } else if (response.statusCode == 400) {
-        // Handle http:BadRequest (Duplicate user) 
         _showSnackBar(responseData['message'] ?? "Signup failed", Colors.orangeAccent);
       } else {
         _showSnackBar("An unexpected error occurred", Colors.redAccent);
       }
     } catch (e) {
-      _showSnackBar("Could not connect to server. Ensure Ballerina is running on port 8080.", Colors.redAccent);
+      _showSnackBar("Could not connect to server.", Colors.redAccent);
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -123,162 +120,192 @@ class _SignupPageState extends State<SignupPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
-      body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeIn,
-          child: SlideTransition(
-            position: _slideUp,
-            child: SingleChildScrollView( 
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 8),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: () => Navigator.maybePop(context),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.06),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.25),
-                              width: 1.2,
+      backgroundColor: Colors.transparent, 
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFF8C00), 
+              Color(0xFFE05CB0), 
+              Color(0xFF8A2BE2),
+              Color(0xFF6A0DAD), 
+            ],
+            stops: [0.0, 0.35, 0.65, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: FadeTransition(
+            opacity: _fadeIn,
+            child: SlideTransition(
+              position: _slideUp,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    // 3. This ensures the column can be at least as tall as the screen
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          children: [
+                            // Back Button
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16, top: 8),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: GestureDetector(
+                                  onTap: () => Navigator.maybePop(context),
+                                  child: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withOpacity(0.15),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.4),
+                                        width: 1.2,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.chevron_left_rounded,
+                                      color: Colors.white,
+                                      size: 26,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Icon(
-                            Icons.chevron_left_rounded,
-                            color: Colors.white.withOpacity(0.85),
-                            size: 26,
-                          ),
+                            const SizedBox(height: 20),
+
+                            // Profile Icon
+                            Container(
+                              width: 88,
+                              height: 88,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(0.92),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withOpacity(0.35),
+                                    blurRadius: 28,
+                                    spreadRadius: 4,
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.person_outline_rounded,
+                                size: 48,
+                                color: Color(0xFFAA55DD),
+                              ),
+                            ),
+                            const SizedBox(height: 40),
+
+                            // Fields
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 32),
+                              child: Column(
+                                children: [
+                                  DarkField(
+                                    controller: _usernameController,
+                                    hint: 'Create Username',
+                                    icon: Icons.person_outline_rounded,
+                                  ),
+                                  const SizedBox(height: 14),
+                                  DarkField(
+                                    controller: _emailController,
+                                    hint: 'Email',
+                                    icon: Icons.mail_outline_rounded,
+                                    keyboardType: TextInputType.emailAddress,
+                                  ),
+                                  const SizedBox(height: 14),
+                                  DarkField(
+                                    controller: _passwordController,
+                                    hint: 'Create Password',
+                                    icon: Icons.lock_outline_rounded,
+                                    obscure: _obscurePassword,
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscurePassword
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                        color: Colors.white70,
+                                        size: 20,
+                                      ),
+                                      onPressed: () => setState(
+                                          () => _obscurePassword = !_obscurePassword),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 14),
+                                  DarkField(
+                                    controller: _confirmPasswordController,
+                                    hint: 'Confirm Password',
+                                    icon: Icons.lock_reset_rounded,
+                                    obscure: _obscureConfirm,
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscureConfirm
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                        color: Colors.white70,
+                                        size: 20,
+                                      ),
+                                      onPressed: () =>
+                                          setState(() => _obscureConfirm = !_obscureConfirm),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 32),
+                              child: _isLoading 
+                                ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                                : SignUpButtonState(
+                                    onTap: _handleSignup, 
+                                  ),
+                            ),
+                            
+                            const Spacer(),
+
+                            const SizedBox(height: 20),
+                            GestureDetector(
+                              onTap: () => Navigator.maybePop(context),
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Already have an account? ',
+                                      style: TextStyle(
+                                        color: Colors.white.withOpacity(0.7),
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    const TextSpan(
+                                      text: 'Log In',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 28),
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.transparent,
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.55),
-                        width: 1.8,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.person_outline_rounded,
-                      size: 42,
-                      color: Colors.white.withOpacity(0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Column(
-                      children: [
-                        DarkField(
-                          controller: _usernameController,
-                          hint: 'Create Username',
-                          icon: Icons.person_outline_rounded,
-                        ),
-                        const SizedBox(height: 14),
-                        DarkField(
-                          controller: _emailController,
-                          hint: 'Email',
-                          icon: Icons.mail_outline_rounded,
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        const SizedBox(height: 14),
-                        DarkField(
-                          controller: _passwordController,
-                          hint: 'Create Password',
-                          icon: Icons.lock_outline_rounded,
-                          obscure: _obscurePassword,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: Colors.white54,
-                              size: 20,
-                            ),
-                            onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        DarkField(
-                          controller: _confirmPasswordController,
-                          hint: 'Confirm Password',
-                          icon: Icons.lock_reset_rounded,
-                          obscure: _obscureConfirm,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscureConfirm
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined,
-                              color: Colors.white54,
-                              size: 20,
-                            ),
-                            onPressed: () =>
-                                setState(() => _obscureConfirm = !_obscureConfirm),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: _isLoading 
-                      ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                      : SignUpButtonState(
-                          onTap: _handleSignup, 
-                        ),
-                  ),
-                  const SizedBox(height: 40),
-                  GestureDetector(
-                    onTap: () => Navigator.maybePop(context),
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Already have an account? ',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
-                              fontSize: 13,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'Log In',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              decoration: TextDecoration.underline,
-                              decorationColor: Colors.white70,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    width: 120,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ),
