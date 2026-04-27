@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:aiva_life/screens/signup.dart';
+import 'package:aiva_life/screens/navigation-instruction.dart';
 import 'package:aiva_life/widgets/LoginPage/LoginButton.dart';
 import 'package:aiva_life/widgets/LoginPage/SocialOrb.dart';
 import 'package:aiva_life/widgets/LoginPage/OutlinedField.dart';
@@ -92,8 +93,15 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       if (!mounted) return;
 
       if (res.statusCode == 200) {
-        final msg = data["message"]?.toString() ?? "Login successful";
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (_, a, __) => const NavigationInstructionPage(),
+            transitionsBuilder: (_, anim, __, child) =>
+                FadeTransition(opacity: anim, child: child),
+            transitionDuration: const Duration(milliseconds: 500),
+          ),
+        );
       } else if (res.statusCode == 401) {
         final msg = data["message"]?.toString() ?? "Invalid credentials";
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
