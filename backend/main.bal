@@ -11,11 +11,17 @@ function init() returns error? {
     _ = check dbClient->execute(`CREATE TABLE IF NOT EXISTS users (
                                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                                     username TEXT UNIQUE,
+                                    email TEXT UNIQUE,
                                     password TEXT
                                 )`);
                                   
-    _ = check dbClient->execute(`INSERT OR IGNORE INTO users (username, password) 
-                                 VALUES ('testuser', 'password123')`);
+    _ = check dbClient->execute(`INSERT OR IGNORE INTO users (username,email, password) 
+                                 VALUES ('testuser', 'testuser@example.com', 'password123')`);
 
+
+    //Login route 
     check ep.attach(new services:LoginService(dbClient), "/api");
+    //Signup route
+    check ep.attach(new services:SignupService(dbClient), "/api/signup");
+
 }

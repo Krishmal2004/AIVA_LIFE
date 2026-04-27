@@ -64,8 +64,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
 
   Future<void> _login() async {
     final username = _usernameController.text.trim();
-    final password = _passwordController.text; // don't trim passwords
-
+    final password = _passwordController.text; 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter both username and password')),
@@ -95,9 +94,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       if (res.statusCode == 200) {
         final msg = data["message"]?.toString() ?? "Login successful";
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-
-        // TODO: Navigate to your next page
-        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()));
       } else if (res.statusCode == 401) {
         final msg = data["message"]?.toString() ?? "Invalid credentials";
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
