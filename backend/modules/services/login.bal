@@ -12,7 +12,7 @@ public isolated service class LoginService {
         self.dbClient = dbClient; 
     }
 
-    resource function post login(models:LoginRequest req) returns http:Ok|http:Unauthorized|http:InternalServerError {
+    resource function post login(@http:Payload models:LoginRequest req) returns http:Ok|http:Unauthorized|http:InternalServerError {
         sql:ParameterizedQuery query = `SELECT id, username, password FROM users WHERE username = ${req.username}`;
         
         stream<models:User, sql:Error?> resultStream = self.dbClient->query(query);

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:aiva_life/screens/signup.dart';
 import 'package:aiva_life/widgets/LoginPage/LoginButton.dart';
 import 'package:aiva_life/widgets/LoginPage/SocialOrb.dart';
@@ -11,19 +15,21 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage>
-    with SingleTickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  late AnimationController _animController;
-  late Animation<double> _fadeIn;
-  late Animation<Offset> _slideUp;
+  bool _isLoading = false;
+
+  late final AnimationController _animController;
+  late final Animation<double> _fadeIn;
+  late final Animation<Offset> _slideUp;
 
   @override
   void initState() {
     super.initState();
+
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -37,10 +43,12 @@ class _LoginPageState extends State<LoginPage>
     _slideUp = Tween<Offset>(
       begin: const Offset(0, 0.25),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animController,
-      curve: const Interval(0.2, 0.9, curve: Curves.easeOut),
-    ));
+    ).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.2, 0.9, curve: Curves.easeOut),
+      ),
+    );
 
     _animController.forward();
   }
@@ -52,6 +60,61 @@ class _LoginPageState extends State<LoginPage>
     _passwordController.dispose();
     super.dispose();
   }
+  String get _baseUrl => "http://10.0.2.2:8080";
+
+  Future<void> _login() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text; // don't trim passwords
+
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter both username and password')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final uri = Uri.parse('$_baseUrl/api/login');
+
+      final res = await http.post(
+        uri,
+        headers: const {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'password': password}),
+      );
+
+      Map<String, dynamic> data = {};
+      if (res.body.isNotEmpty) {
+        final decoded = jsonDecode(res.body);
+        if (decoded is Map<String, dynamic>) data = decoded;
+      }
+
+      if (!mounted) return;
+
+      if (res.statusCode == 200) {
+        final msg = data["message"]?.toString() ?? "Login successful";
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+
+        // TODO: Navigate to your next page
+        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()));
+      } else if (res.statusCode == 401) {
+        final msg = data["message"]?.toString() ?? "Invalid credentials";
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      } else {
+        final msg = data["message"]?.toString() ?? "Server error (${res.statusCode})";
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Network error: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,8 +210,9 @@ class _LoginPageState extends State<LoginPage>
                               color: Colors.white70,
                               size: 20,
                             ),
-                            onPressed: () =>
-                                setState(() => _obscurePassword = !_obscurePassword),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                           ),
                         ),
                       ],
@@ -157,21 +221,22 @@ class _LoginPageState extends State<LoginPage>
                   const SizedBox(height: 36),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 36),
-                    child: LoginButton(
-                      label: 'Login',
-                      onTap: () {
-                        // TODO: handle login
-                      },
+                    child: AbsorbPointer(
+                      absorbing: _isLoading,
+                      child: LoginButton(
+                        label: _isLoading ? 'Logging in...' : 'Login',
+                        onTap: _login,
+                      ),
                     ),
                   ),
                   const Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: const [
                       SocialOrb(icon: Icons.g_mobiledata_rounded),
-                      const SizedBox(width: 20),
+                      SizedBox(width: 20),
                       SocialOrb(icon: Icons.facebook_rounded),
-                      const SizedBox(width: 20),
+                      SizedBox(width: 20),
                       SocialOrb(icon: Icons.apple_rounded),
                     ],
                   ),
@@ -184,8 +249,7 @@ class _LoginPageState extends State<LoginPage>
                           pageBuilder: (_, a, __) => const SignupPage(),
                           transitionsBuilder: (_, anim, __, child) =>
                               FadeTransition(opacity: anim, child: child),
-                          transitionDuration:
-                              const Duration(milliseconds: 400),
+                          transitionDuration: const Duration(milliseconds: 400),
                         ),
                       );
                     },
