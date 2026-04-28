@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_sign_in/google_sign_in.dart'; 
 
 import 'package:aiva_life/screens/signup.dart';
 import 'package:aiva_life/screens/navigation-instruction.dart';
@@ -61,6 +62,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     _passwordController.dispose();
     super.dispose();
   }
+  
   String get _baseUrl => "http://10.0.2.2:8080";
 
   Future<void> _login() async {
@@ -113,6 +115,65 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Network error: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loginWithGoogle() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        throw Exception("Failed to get Google ID Token");
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/google-auth/login');
+      final res = await http.post(
+        uri,
+        headers: const {'Content-Type': 'application/json'},
+        body: jsonEncode({'idToken': idToken}),
+      );
+
+      Map<String, dynamic> data = {};
+      if (res.body.isNotEmpty) {
+        final decoded = jsonDecode(res.body);
+        if (decoded is Map<String, dynamic>) data = decoded;
+      }
+
+      if (!mounted) return;
+
+      // 4. Handle Backend Response
+      if (res.statusCode == 200) {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (_, a, __) => const NavigationInstructionPage(),
+            transitionsBuilder: (_, anim, __, child) =>
+                FadeTransition(opacity: anim, child: child),
+            transitionDuration: const Duration(milliseconds: 500),
+          ),
+        );
+      } else {
+        final msg = data["message"]?.toString() ?? "Google Login failed (${res.statusCode})";
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      }
+
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Sign-In Error: $e')),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -236,12 +297,16 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                   const Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      SocialOrb(icon: Icons.g_mobiledata_rounded),
-                      SizedBox(width: 20),
-                      SocialOrb(icon: Icons.facebook_rounded),
-                      SizedBox(width: 20),
-                      SocialOrb(icon: Icons.apple_rounded),
+                    children: [
+                      // --- NEW: Wrapped Google Icon with GestureDetector ---
+                      GestureDetector(
+                        onTap: _isLoading ? null : _loginWithGoogle,
+                        child: const SocialOrb(icon: Icons.g_mobiledata_rounded),
+                      ),
+                      const SizedBox(width: 20),
+                      const SocialOrb(icon: Icons.facebook_rounded),
+                      const SizedBox(width: 20),
+                      const SocialOrb(icon: Icons.apple_rounded),
                     ],
                   ),
                   const SizedBox(height: 24),
