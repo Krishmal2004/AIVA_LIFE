@@ -23,5 +23,10 @@ function init() returns error? {
     check ep.attach(new services:LoginService(dbClient), "/api");
     //Signup route
     check ep.attach(new services:SignupService(dbClient), "/api/signup");
-
+    
+    // google auth route - ADDED "check" before "new"
+    check ep.attach(check new services:GoogleAuthService(dbClient), "/api/google-auth");
+    
+    // Email route - ADDED "check" before "new"
+    check ep.attach(check new services:EmailService(), "/api/email");
 }
